@@ -38,6 +38,8 @@ int main(void)
 
     glEnable(GL_DEPTH_TEST);  
 
+    printf("[INFO] OpenGL Version: %s\n", glGetString(GL_VERSION));
+
     scene_t scene = scene_load("deez");
 
     while (!glfwWindowShouldClose(window))

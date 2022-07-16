@@ -7,8 +7,8 @@ SRC = ${wildcard ./src/*.c ./src/vendor/glad/*.c ./src/vendor/stbi/*.c}
 OBJS = ${patsubst %.c,build/%.o,${SRC}}
 CFLAGS = -Wall -g
 CC = gcc
-INCLUDES = -I "src/vendor" `pkg-config --cflags glfw3 gl`
-LIBS = -Llib -lcglm `pkg-config --static --libs --cflags glfw3 gl`
+INCLUDES = -I "src/vendor" -Iinclude
+LIBS = -Llib -lcglm -lglfw3 -lm -ljson-c
 
 bin:${OBJS}
 	@echo "Linking..."

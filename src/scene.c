@@ -14,16 +14,12 @@
 #include "object.h"
 
 scene_t scene_load(const char* path){
-    printf("aa\n");
     scene_t scene;
     unsigned int shaders[] = {
         shader_make_from_file("res/shaders/simple.glsl")
     };
-    mesh_t meshes[] = {
-        mesh_make("res/meshes/cube.json")
-    };
     unsigned int vaos[] = {
-        mesh_make_vao(&meshes[0])
+        mesh_make("res/meshes/cube.json")
     };
     unsigned int uniforms[] = {
         glGetUniformLocation(shaders[0], "u_proj"),
@@ -33,28 +29,28 @@ scene_t scene_load(const char* path){
     };
     scene.objc = 4;
     scene.obj = malloc(scene.objc * sizeof(object_t));
-    ((object_t*)scene.obj)[0] = obj_make(vaos[0], shaders[0], meshes[0].icount);
+    ((object_t*)scene.obj)[0] = obj_make(vaos[0], shaders[0], 36);
     obj_set_color((object_t*)scene.obj + 0, 1.0f, 0.0f, 0.0f);
     obj_transform((object_t*)scene.obj + 0, 
         4.0f, 0.0f,-5.0f, 
         0.0f, 1.0f, 0.0f, 30.0f, 
         1.0f, 1.0f, 1.0f);
 
-    ((object_t*)scene.obj)[1] = obj_make(vaos[0], shaders[0], meshes[0].icount);
+    ((object_t*)scene.obj)[1] = obj_make(vaos[0], shaders[0], 36);
     obj_set_color((object_t*)scene.obj + 1, 0.0f, 1.0f, 0.0f);
     obj_transform((object_t*)scene.obj + 1, 
         -3.5f, 1.0f,-6.0f, 
         0.0f, 1.0f, 0.0f, 45.0f, 
         1.0f, 3.0f, 1.0f);
 
-    ((object_t*)scene.obj)[2] = obj_make(vaos[0], shaders[0], meshes[0].icount);
+    ((object_t*)scene.obj)[2] = obj_make(vaos[0], shaders[0], 36);
     obj_set_color((object_t*)scene.obj + 2, 0.0f, 0.0f, 1.0f);
     obj_transform((object_t*)scene.obj + 2, 
         1.0f, 0.0f, 2.0f, 
         0.0f, 1.0f, 0.0f, 0.0f, 
         1.0f, 1.0f, 1.0f);
 
-    ((object_t*)scene.obj)[3] = obj_make(vaos[0], shaders[0], meshes[0].icount);
+    ((object_t*)scene.obj)[3] = obj_make(vaos[0], shaders[0], 36);
     obj_set_color((object_t*)scene.obj + 3, 1.0f, 1.0f, 1.0f);
     obj_transform((object_t*)scene.obj + 3, 
         0.0f, -0.505f, 0.0f, 
@@ -95,7 +91,7 @@ scene_t scene_load(const char* path){
 }
 
 void scene_update(scene_t* scene, float time, int wwidth, int wheight){
-    float delta = time - scene->time;
+    //float delta = time - scene->time;
     scene->time = time;
 
     glm_perspective(glm_rad(45.0f), ((float)wwidth)/wheight, 0.1f, 10000.0f, *(mat4*)scene->proj);
