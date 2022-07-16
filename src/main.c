@@ -42,44 +42,13 @@ int main(void)
 
     printf("[INFO] OpenGL Version: %s\n", glGetString(GL_VERSION));
 
-    //scene_t scene = scene_load("deez");
-
-    float vets[] = {
-        -0.5, 0.5,
-         0.5, 0.5,
-         0.5,-0.5,
-        -0.5,-0.5
-    };
-
-    unsigned int inds[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    unsigned int vao, vbo, ibo;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vets), vets, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0));
-
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(inds), inds, GL_STATIC_DRAW);
-
-    glUseProgram(shader_make_from_file("res/shaders/basic.glsl"));
+    scene_t scene = scene_load("deez");
 
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        //scene_update(&scene, glfwGetTime(), wwidth, wheight);
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        scene_update(&scene, glfwGetTime(), wwidth, wheight);
 
         glfwSwapBuffers(window);
 
