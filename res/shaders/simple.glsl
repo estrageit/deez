@@ -31,6 +31,6 @@ void main()
     vec3 normal = normalize(v_normal);
     
     float diffuse = max(dot(normal, light_dir), 0.0);
-    //FragColor = vec4(u_color * diffuse + u_color * 0.1, 1.0);
-    FragColor = vec4(u_color, 1.0);
+    FragColor = vec4(u_color * diffuse + u_color * 0.1, 1.0);
+    //FragColor = vec4(u_color, 1.0);
 } 

@@ -56,7 +56,7 @@ unsigned int mesh_make(const char* path){
     unsigned int vb_s = sizeof(float) * vertexc * vert_s;
     float* vertices = malloc(vb_s);
 
-    printf("[INFO] Loading model \"%s\":\n\tVertex Count: %d\n\tAttribute count: %d\n\tVertex size: %d\n", path, vertexc, vatc, vert_s);
+    printf("[INFO] Loading model \"%s\":\n\tVertex Count: %d\n\tAttribute count: %d\n\tVertex size: %d\n\tIndex count: %d\n", path, vertexc, vatc, vert_s, indexc);
 
     for(int i = 0; i < vertexc; i++){
         float* cvert = vertices + i * vert_s;
@@ -81,8 +81,12 @@ unsigned int mesh_make(const char* path){
     glBufferData(GL_ARRAY_BUFFER, vb_s, vertices, GL_STATIC_DRAW);
 
     for(int i = 0; i < vatc; i++){
+        int offset = 0;
+        for (int j = 0; j < i; j++)
+            offset += vats[j];
+        
         glEnableVertexAttribArray(i);
-        glVertexAttribPointer(i, vats[i], GL_FLOAT, GL_FALSE, vert_s * sizeof(float), (void*)(vats[i] * sizeof(float)));
+        glVertexAttribPointer(i, vats[i], GL_FLOAT, GL_FALSE, vert_s * sizeof(float), (void*)(offset * sizeof(float)));
     }
 
     glGenBuffers(1, &ibo);

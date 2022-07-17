@@ -91,9 +91,10 @@ scene_t scene_load(const char* path){
 }
 
 void scene_update(scene_t* scene, float time, int wwidth, int wheight){
-    //float delta = time - scene->time;
+    float delta = time - scene->time;
     scene->time = time;
-
+    ((object_t*)scene->obj)->trans;
+    glm_rotate(((object_t*)scene->obj)[2].trans, delta, (vec3){0, 1, 0});
     glm_perspective(glm_rad(45.0f), ((float)wwidth)/wheight, 0.1f, 10000.0f, *(mat4*)scene->proj);
     //glm_look((vec3){0, 0, 0}, (vec3){sin(time), 0, cos(time)}, (vec3){0, 1, 0}, *(mat4*)scene->camera);
     glm_look((vec3){16, 7, 16}, (vec3){-1, -0.5f, -1}, (vec3){0, 1, 0}, *(mat4*)scene->camera);
