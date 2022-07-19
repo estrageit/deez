@@ -18,8 +18,9 @@ scene_t scene_load(const char* path){
     unsigned int shaders[] = {
         shader_make_from_file("res/shaders/simple.glsl")
     };
+    unsigned int i_counts[1];
     unsigned int vaos[] = {
-        mesh_make("res/meshes/cube.json")
+        mesh_make("res/meshes/cube.json", &(i_counts[0]))
     };
     unsigned int uniforms[] = {
         glGetUniformLocation(shaders[0], "u_proj"),
@@ -29,28 +30,28 @@ scene_t scene_load(const char* path){
     };
     scene.objc = 4;
     scene.obj = malloc(scene.objc * sizeof(object_t));
-    ((object_t*)scene.obj)[0] = obj_make(vaos[0], shaders[0], 36);
+    ((object_t*)scene.obj)[0] = obj_make(vaos[0], shaders[0], i_counts[0]);
     obj_set_color((object_t*)scene.obj + 0, 1.0f, 0.0f, 0.0f);
     obj_transform((object_t*)scene.obj + 0, 
         4.0f, 0.0f,-5.0f, 
         0.0f, 1.0f, 0.0f, 30.0f, 
         1.0f, 1.0f, 1.0f);
 
-    ((object_t*)scene.obj)[1] = obj_make(vaos[0], shaders[0], 36);
+    ((object_t*)scene.obj)[1] = obj_make(vaos[0], shaders[0], i_counts[0]);
     obj_set_color((object_t*)scene.obj + 1, 0.0f, 1.0f, 0.0f);
     obj_transform((object_t*)scene.obj + 1, 
         -3.5f, 1.0f,-6.0f, 
         0.0f, 1.0f, 0.0f, 45.0f, 
         1.0f, 3.0f, 1.0f);
 
-    ((object_t*)scene.obj)[2] = obj_make(vaos[0], shaders[0], 36);
+    ((object_t*)scene.obj)[2] = obj_make(vaos[0], shaders[0], i_counts[0]);
     obj_set_color((object_t*)scene.obj + 2, 0.0f, 0.0f, 1.0f);
     obj_transform((object_t*)scene.obj + 2, 
         1.0f, 0.0f, 2.0f, 
         0.0f, 1.0f, 0.0f, 0.0f, 
         1.0f, 1.0f, 1.0f);
 
-    ((object_t*)scene.obj)[3] = obj_make(vaos[0], shaders[0], 36);
+    ((object_t*)scene.obj)[3] = obj_make(vaos[0], shaders[0], i_counts[0]);
     obj_set_color((object_t*)scene.obj + 3, 1.0f, 1.0f, 1.0f);
     obj_transform((object_t*)scene.obj + 3, 
         0.0f, -0.505f, 0.0f, 
@@ -93,7 +94,7 @@ scene_t scene_load(const char* path){
 void scene_update(scene_t* scene, float time, int wwidth, int wheight){
     float delta = time - scene->time;
     scene->time = time;
-    ((object_t*)scene->obj)->trans;
+
     glm_rotate(((object_t*)scene->obj)[2].trans, delta, (vec3){0, 1, 0});
     glm_perspective(glm_rad(45.0f), ((float)wwidth)/wheight, 0.1f, 10000.0f, *(mat4*)scene->proj);
     //glm_look((vec3){0, 0, 0}, (vec3){sin(time), 0, cos(time)}, (vec3){0, 1, 0}, *(mat4*)scene->camera);

@@ -8,7 +8,7 @@
 #include <glad/gl.h>
 
 //todo: add checks in this function for improperly formatted json files!!
-unsigned int mesh_make(const char* path){
+unsigned int mesh_make(const char* path, unsigned int* index_count){
     FILE *fp;
 	fp = fopen(path, "r");
 
@@ -102,6 +102,8 @@ unsigned int mesh_make(const char* path){
     free(buf);
     free(indices);
     free(vertices);
+
+    *index_count = indexc;
 
     return vao;
 }

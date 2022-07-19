@@ -28,8 +28,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow(wwidth, wheight, "Deez", NULL, NULL);
-    if (!window)
-    {
+    if (!window){
         glfwTerminate();
         return -1;
     }    
@@ -44,8 +43,7 @@ int main(void)
 
     scene_t scene = scene_load("deez");
 
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         scene_update(&scene, glfwGetTime(), wwidth, wheight);
