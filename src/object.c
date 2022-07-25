@@ -1,27 +1,38 @@
 #include "object.h"
 
 #include <cglm/cglm.h>
+#include <stdio.h>
 
-object_t obj_make(unsigned int mesh, unsigned int shader, unsigned int triangle_count){
-    object_t obj;
-    obj.triangle_count = triangle_count;
-    obj.mesh = mesh;
-    obj.shader = shader;
+material_t* mat_make(float r, float g, float b, float specular, float shine){
+    material_t* mat = malloc(sizeof(material_t));
 
-    obj.trans = malloc(16 * sizeof(float));
-    glm_mat4_identity(*(mat4*)obj.trans);
+    mat->ambient[0] = r;
+    mat->ambient[1] = g;
+    mat->ambient[2] = b;
 
-    obj.color = malloc(3 * sizeof(float));
-    obj.color[0] = 1.0f;
-    obj.color[1] = 1.0f;
-    obj.color[2] = 1.0f;
-    return obj;
+    mat->diffuse[0] = r;
+    mat->diffuse[1] = g;
+    mat->diffuse[2] = b;
+
+    mat->specular[0] = specular;
+    mat->specular[1] = specular;
+    mat->specular[2] = specular;
+
+    mat->shininess = shine;
+    return mat;
 }
 
-void obj_set_color(object_t *obj, float r, float g, float b){
-    obj->color[0] = r;
-    obj->color[1] = g;
-    obj->color[2] = b;
+object_t* obj_make(unsigned int mesh, unsigned int shader, unsigned int triangle_count, material_t* material){    
+    object_t* obj = malloc(sizeof(object_t));
+
+    obj->triangle_count = triangle_count;
+    obj->mesh = mesh;
+    obj->shader = shader;
+    obj->mat = material;
+
+    obj->trans = malloc(sizeof(mat4));
+    glm_mat4_identity(obj->trans);
+    return obj;
 }
 
 void obj_transform(object_t *obj, 
@@ -29,7 +40,8 @@ void obj_transform(object_t *obj,
     float rx, float ry, float rz, float r,
     float sx, float sy, float sz)
 {    
-    glm_translate(obj->trans, (vec3){tx, ty, tz});
-    glm_rotate(obj->trans, glm_deg(r), (vec3){rx, ry, rz});
-    glm_scale(obj->trans, (vec3){sx, sy, sz});
+    glm_mat4_identity(obj->trans);
+    glm_translate(*(mat4*)obj->trans, (vec3){tx, ty, tz});
+    glm_rotate(*(mat4*)obj->trans, glm_deg(r), (vec3){rx, ry, rz});
+    glm_scale(*(mat4*)obj->trans, (vec3){sx, sy, sz});
 }

@@ -7,6 +7,7 @@
 #include "scene.h"
 
 #include "shader.h"
+#include "input.h"
 
 int wwidth = 640, wheight = 480;
 
@@ -16,8 +17,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height){
     wheight = height;
 }
 
-int main(void)
-{
+int main(void){
     GLFWwindow* window;
 
     if (!glfwInit())
@@ -41,12 +41,26 @@ int main(void)
 
     printf("[INFO] OpenGL Version: %s\n", glGetString(GL_VERSION));
 
-    scene_t scene = scene_load("deez");
+    glfwSetCursorPos(window, wwidth / 2.0, wheight / 2.0);
+
+    scene_t* scene = scene_load("deez");
+    input_t input;
+    for(int i = 0; i < sizeof(input_t); i++){
+        ((char*)(&input))[i] = 0;
+    }
+    input_lock_mouse(window, &input, 1);
+
+    char lock = 1;
 
     while (!glfwWindowShouldClose(window)){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        scene_update(&scene, glfwGetTime(), wwidth, wheight);
+        input_update(window, &input);
+        if (input.k.down & (uint64_t)1 << ('E' - 32)){
+            lock ^= 1;
+            input_lock_mouse(window, &input, lock);
+        }
+        scene_update(scene, glfwGetTime(), wwidth, wheight, &input);
         
         glfwSwapBuffers(window);
 
