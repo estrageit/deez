@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
+//needs to change eventually
 void input_update(void* window, input_t* input){
     input->k.down = 0;
     for (int i = 0; i < 64; i++){

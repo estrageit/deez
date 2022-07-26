@@ -12,8 +12,13 @@ unsigned int lnk_count(lnk *head){
     }
     return count;
 }
-void lnk_push(lnk *head, lnk *node){
-    lnk *current = head;
+void lnk_push(lnk **head, lnk *node){
+    if (*head == NULL){
+        *head = node;
+        node->next = NULL;
+        return;
+    }
+    lnk *current = *head;
     while(current->next != NULL){
         current = current->next;
     }
