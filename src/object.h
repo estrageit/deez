@@ -5,6 +5,7 @@ typedef struct material_t {
     float diffuse[3];
     float ambient[3];
     float shininess;
+    unsigned int texture;
 } material_t;
 
 typedef struct object_t {
@@ -17,6 +18,7 @@ typedef struct object_t {
 } object_t;
 
 material_t* mat_make(float r, float g, float b, float specular, float shine);
+material_t* mat_make_from_file(const char* path);
 
 object_t* obj_make(unsigned int mesh, unsigned int shader, unsigned int triangle_count, material_t* material);
 void obj_transform(object_t *obj, 

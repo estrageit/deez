@@ -5,6 +5,7 @@
 
 #include <glad/gl.h>
 #include <cglm/cglm.h>
+#include <json-c/json.h>
 
 #include "renderer.h"
 //#include "collider.h"
@@ -14,42 +15,138 @@
 #include "object.h"
 #include "input.h"
 
+typedef struct obj_t {
+    float pos[3];
+    float rot[3];
+    float angle;
+    float scl[3];
+} obj_t;
+
+obj_t* make_obj(json_object* j_obj){
+    obj_t* obj = malloc(sizeof(obj_t));
+
+    json_object* j_current = json_object_object_get(j_obj, "pos");
+    for (int i = 0; i < 3; i++){
+        json_object* index = json_object_array_get_idx(j_current, i);
+        obj->pos[i] = json_object_get_double(index);
+        //printf("%f ", obj->pos[i]);
+    }
+    //printf("\n");
+    j_current = json_object_object_get(j_obj, "rot");
+    for (int i = 0; i < 3; i++){
+        json_object* index = json_object_array_get_idx(j_current, i);
+        obj->rot[i] = json_object_get_double(index);
+    }
+    json_object* index = json_object_array_get_idx(j_current, 3);
+    obj->angle = json_object_get_double(index);
+    //printf("%f\n", obj->angle);
+    j_current = json_object_object_get(j_obj, "scl");
+    for (int i = 0; i < 3; i++){
+        json_object* index = json_object_array_get_idx(j_current, i);
+        obj->scl[i] = json_object_get_double(index);
+    }
+
+    return obj;
+}
+
 scene_t* scene_load(const char* path){
     scene_t* scene = malloc(sizeof(scene_t)); 
     scene->time = 0;
     scene->rend = NULL;
-    glm_vec3_copy((vec3){0, 0, 1}, scene->camera_rot);
-
-    unsigned int shader = shader_make_from_file("res/shaders/simple.glsl");
-    rend_shader_push((rend_t**)&(scene->rend), shader);
     scene->proj = malloc(sizeof(mat4));
     scene->view = malloc(sizeof(mat4));
-    glm_mat4_identity(scene->proj);
-    glm_mat4_identity(scene->view);
-    glm_vec3_zero(scene->camera_pos);
-    glm_vec3_zero(scene->light_pos);
-    unif_push(&(((rend_t*)scene->rend)->uniforms), glGetUniformLocation(shader, "u_proj"), UNIF_MAT4, scene->proj);
-    unif_push(&(((rend_t*)scene->rend)->uniforms), glGetUniformLocation(shader, "u_view"), UNIF_MAT4, scene->view);
-    unif_push(&(((rend_t*)scene->rend)->uniforms), glGetUniformLocation(shader, "u_camera"), UNIF_VEC3, scene->camera_pos);
-    unif_push(&(((rend_t*)scene->rend)->uniforms), glGetUniformLocation(shader, "u_light"), UNIF_VEC3, scene->light_pos);
+    glm_vec3_copy((vec3){0, 0, -1}, scene->camera_rot);
+    glm_vec3_copy((vec3){0, 0, 0}, scene->camera_pos);
+    glm_vec3_copy((vec3){0, 0, 0}, scene->light_pos);
 
-    unsigned int ib_count;
-    unsigned int vao = mesh_make("res/meshes/cube.json", &ib_count);
-    rend_vao_push(scene->rend, vao, ib_count);
+    FILE *fp;
+	fp = fopen(path, "r");
+    fseek(fp, 0, SEEK_END);
+    unsigned int f_size = ftell(fp); 
+    fseek(fp, 0, SEEK_SET);
+    char* buf = malloc(f_size + 1);
+	fread(buf, f_size, 1, fp);
+	fclose(fp);
 
-    rend_material_push(((rend_t*)scene->rend)->vaos, 0);
-    material_t* mat = mat_make(1, 0.5f, 1, 0.5f, 32.0f);
-    unif_push(&(((rend_t*)scene->rend)->vaos->mats->uniforms), glGetUniformLocation(shader, "u_mat.ambient"), UNIF_VEC3, mat->ambient);
-    unif_push(&(((rend_t*)scene->rend)->vaos->mats->uniforms), glGetUniformLocation(shader, "u_mat.diffuse"), UNIF_VEC3, mat->diffuse);
-    unif_push(&(((rend_t*)scene->rend)->vaos->mats->uniforms), glGetUniformLocation(shader, "u_mat.specular"), UNIF_VEC3, mat->specular);
-    unif_push(&(((rend_t*)scene->rend)->vaos->mats->uniforms), glGetUniformLocation(shader, "u_mat.shininess"), UNIF_FLOAT, &mat->shininess);
+    json_object* j_scene = json_tokener_parse(buf);
 
-    rend_object_push(((rend_t*)scene->rend)->vaos->mats);
-    scene->model = malloc(sizeof(mat4));
-    glm_mat4_identity(scene->model);
-    glm_translate(scene->model, (vec3){0, 0, 3});
-    glm_rotate(scene->model, 45, (vec3){1, 1, 1});
-    unif_push(&(((rend_t*)scene->rend)->vaos->mats->objs->uniforms), glGetUniformLocation(shader, "u_model"), UNIF_MAT4, scene->model);
+    //free(buf);
+
+    unsigned int shader_count = json_object_array_length(j_scene);
+    rend_t** r_shader = (rend_t**)(&(scene->rend));
+    for (int i = 0; i < shader_count; i++){
+        json_object* j_shader = json_object_array_get_idx(j_scene, i);
+        unsigned int shader_id = shader_make_from_file(json_object_get_string(json_object_object_get(j_shader, "shader")));
+        rend_shader_push(r_shader, shader_id);
+        
+        unsigned int unif_locs[] = {
+            glGetUniformLocation(shader_id, "u_proj"),
+            glGetUniformLocation(shader_id, "u_view"),
+            glGetUniformLocation(shader_id, "u_model"),
+
+            glGetUniformLocation(shader_id, "u_mat.ambient"),
+            glGetUniformLocation(shader_id, "u_mat.diffuse"),
+            glGetUniformLocation(shader_id, "u_mat.specular"),
+            glGetUniformLocation(shader_id, "u_mat.shininess"),
+
+            glGetUniformLocation(shader_id, "u_camera"),
+            glGetUniformLocation(shader_id, "u_light"),
+        };
+
+        unif_push(&(*r_shader)->uniforms, unif_locs[0], UNIF_MAT4, scene->proj);
+        unif_push(&(*r_shader)->uniforms, unif_locs[1], UNIF_MAT4, scene->view);
+
+        unif_push(&(*r_shader)->uniforms, unif_locs[7], UNIF_VEC3, scene->camera_pos);
+        unif_push(&(*r_shader)->uniforms, unif_locs[8], UNIF_VEC3, scene->light_pos);
+
+        json_object* j_vaos = json_object_object_get(j_shader, "vaos");
+        vao_r_t** r_vao = &(*r_shader)->vaos;
+        unsigned int vao_count = json_object_array_length(j_vaos);
+        for (int j = 0; j < vao_count; j++){
+            json_object* j_vao = json_object_array_get_idx(j_vaos, j);
+
+            mesh_t* mesh = mesh_make(json_object_get_string(json_object_object_get(j_vao, "vao")));
+            rend_vao_push(*r_shader, mesh->vao, mesh->tcount);
+            json_object* j_materials = json_object_object_get(j_vao, "materials");
+            mat_r_t** r_material = &(*r_vao)->mats;
+            unsigned int material_count = json_object_array_length(j_materials);
+            for (int k = 0; k < material_count; k++){
+                json_object* j_material = json_object_array_get_idx(j_materials, k);
+
+                material_t* material = mat_make_from_file(json_object_get_string(json_object_object_get(j_material, "material")));
+                rend_material_push(*r_vao, material->texture);
+
+                unif_push(&(*r_material)->uniforms, unif_locs[3], UNIF_VEC3, material->ambient);
+                unif_push(&(*r_material)->uniforms, unif_locs[4], UNIF_VEC3, material->diffuse);
+                unif_push(&(*r_material)->uniforms, unif_locs[5], UNIF_VEC3, material->specular);
+                unif_push(&(*r_material)->uniforms, unif_locs[6], UNIF_FLOAT, &material->shininess);
+
+                json_object* j_objects = json_object_object_get(j_material, "objects");
+                obj_r_t** r_object = &(*r_material)->objs;
+                unsigned int object_count = json_object_array_length(j_objects);
+                for (int l = 0; l < object_count; l++){
+                    json_object* j_object = json_object_array_get_idx(j_objects, l);
+
+                    rend_object_push(*r_material);
+                    obj_t* obj = make_obj(j_object);
+                    mat4* obj_trans = malloc(sizeof(mat4));
+                    glm_mat4_identity(*obj_trans);
+                    glm_scale(*obj_trans, obj->scl);
+                    glm_translate(*obj_trans, obj->pos);
+                    glm_rotate(*obj_trans, obj->angle, obj->rot);
+                    unif_push(&(*r_object)->uniforms, unif_locs[2], UNIF_MAT4, obj_trans);
+
+                    r_object = &(*r_object)->next;
+                }
+                r_material = &(*r_material)->next;
+            }
+            r_vao = &(*r_vao)->next;
+        }
+        r_shader = &(*r_shader)->next;
+    }
+    json_object_put(j_scene);
+
+    printf("[INFO] Scene \"%s\" successfully loaded\n", path);
 
     return scene;
 }
@@ -77,8 +174,8 @@ void scene_update(scene_t* scene, float time, int wwidth, int wheight, void* inp
     glm_vec3_rotate_m4(trans, rot, rot);
     glm_vec3_add(scene->camera_rot, rot, rot);
     glm_vec3_normalize(rot);
-    if (glm_vec3_angle((vec3){0, 1, 0}, rot) > 0.1f &&
-        glm_vec3_angle((vec3){0, -1, 0}, rot) > 0.1f){
+    if (glm_vec3_angle((vec3){0, 1, 0}, rot) > 0.3f &&
+        glm_vec3_angle((vec3){0, -1, 0}, rot) > 0.3f){
         glm_vec3_copy(rot, scene->camera_rot);
     }
 
@@ -89,7 +186,7 @@ void scene_update(scene_t* scene, float time, int wwidth, int wheight, void* inp
 
     glm_look(scene->camera_pos, scene->camera_rot, (vec3){0, 1, 0}, scene->view);
 
-    glm_perspective(glm_rad(90.0f), ((float)wwidth)/wheight, 0.1f, 1000.0f, *(mat4*)scene->proj);
+    glm_perspective(glm_rad(90.0f), ((float)wwidth)/wheight, 0.1f, 100.0f, *(mat4*)scene->proj);
     glm_vec3_copy((vec3){sin(time) * 10, 10, cos(time) * 10}, scene->light_pos);
 
     rend_draw(scene->rend);

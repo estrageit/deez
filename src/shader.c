@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cache.h"
+
 unsigned int compile_shader(int type, const char* source){
     unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, NULL);
@@ -18,7 +20,7 @@ unsigned int compile_shader(int type, const char* source){
     if (!success)
     {
         glGetShaderInfoLog(shader, 1024, NULL, log);
-        printf("ERROR COMPILING SHADER OF TYPE %s: %s\n", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", log);
+        printf("[ERROR] COMPILING SHADER OF TYPE %s: %s\n", type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", log);
         return 0;
     }
 
@@ -42,7 +44,7 @@ unsigned int shader_make(const char* vertex, const char* fragment){
     if (!success)
     {
         glGetProgramInfoLog(id, 1024, NULL, log);
-        printf("ERROR LINKING SHADER: %s\n", log);
+        printf("[ERROR] LINKING SHADER: %s\n", log);
         id = 0;
     }
 
@@ -52,14 +54,22 @@ unsigned int shader_make(const char* vertex, const char* fragment){
     return id;
 }
 
-unsigned int shader_make_from_file(const char* shader){
+cache_l* cache_s = NULL;
+
+unsigned int shader_make_from_file(const char* path){
+    unsigned int cached = (uint64_t)cache_get(cache_s, path);
+    if(cached){
+        return cached;
+    }
+
+    printf("[INFO] Loading shader \"%s\"\n", path);
     FILE *fp;
     unsigned int size;
     char *buf;
 
-    fp = fopen(shader, "rb");
+    fp = fopen(path, "rb");
     if (fp == NULL) {
-        printf("ERROR: can't open shader file %s\n", shader);
+        printf("[ERROR] Can't open shader file %s\n", path);
         return 0;
     }
 
@@ -72,7 +82,7 @@ unsigned int shader_make_from_file(const char* shader){
     if (fread(buf, 1, size, fp) != size) {
         fclose(fp);
         free(buf);
-        printf("ERROR: could open shader file '%s' but reading was not possible", shader);
+        printf("[ERROR] Could open shader file '%s' but reading was not possible", path);
         return 0;
     }
 
@@ -96,7 +106,7 @@ unsigned int shader_make_from_file(const char* shader){
                 break;
             }
             else if(buf[i] == '\0'){
-                printf("ERROR: shader '%s' formatted incorrectly: key doesn't end with a space\n", shader);
+                printf("[ERROR] shader '%s' formatted incorrectly: key doesn't end with a space\n", path);
             }
             keylen++;
         }
@@ -114,14 +124,14 @@ unsigned int shader_make_from_file(const char* shader){
                 src_frag = arg + 4;
             }
             else
-                printf("ERROR: shader '%s' formatted incorrectly: SHADER_TYPE '%s' is incorrect\n", shader, arg);
+                printf("[ERROR] shader '%s' formatted incorrectly: SHADER_TYPE '%s' is incorrect\n", path, arg);
             arg[4] = tempchar;
         }
         else if(strcmp(key, "INT") == 0){
         
         }
         else{
-            printf("ERROR: shader '%s' formatted incorrectly: incorrect key '%s'\n", shader, key);
+            printf("[ERROR] shader '%s' formatted incorrectly: incorrect key '%s'\n", path, key);
         }
     }
 
@@ -130,6 +140,8 @@ unsigned int shader_make_from_file(const char* shader){
 
     unsigned int shader_id = shader_make(src_vert, src_frag);
     free(buf);
+
+    cache_push(&cache_s, path, (void*)(uint64_t)shader_id);
 
     return shader_id;
 }

@@ -6,7 +6,6 @@ typedef struct scene_t {
 
     void* proj;
     void* view;
-    void* model;
     float camera_pos[3];
     float camera_rot[3];
     float light_pos[3];

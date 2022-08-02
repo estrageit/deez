@@ -16,8 +16,17 @@ $SHADER_TYPE FRAG
 
 #version 330 core
 out vec4 FragColor;
-  
+
+struct mat_t {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+}; 
+
+uniform mat_t u_mat;
+
 void main()
 {
-    FragColor = vec4(1,1,1,1);
+    FragColor = vec4(u_mat.ambient, 1);
 } 

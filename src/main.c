@@ -43,7 +43,7 @@ int main(void){
 
     glfwSetCursorPos(window, wwidth / 2.0, wheight / 2.0);
 
-    scene_t* scene = scene_load("deez");
+    scene_t* scene = scene_load("res/scenes/test.json");
     input_t input;
     for(int i = 0; i < sizeof(input_t); i++){
         ((char*)(&input))[i] = 0;

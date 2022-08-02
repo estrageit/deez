@@ -35,6 +35,8 @@ void unif_set(unif_t* head){
 }
 
 void unif_push(unif_t** head, int location, int type, void* data){
+    if (location == -1)
+        return;
     unif_t *node = malloc(sizeof(unif_t));
     node->next = NULL;
     node->location = location;
@@ -83,17 +85,14 @@ void rend_draw(rend_t* head){
     while (cur_sh != NULL){
         glUseProgram(cur_sh->shader);
         unif_set(cur_sh->uniforms);
-
         vao_r_t *cur_vao = cur_sh->vaos;
         while (cur_vao != NULL){
             glBindVertexArray(cur_vao->vao);
             unif_set(cur_vao->uniforms);
-            
             mat_r_t *cur_mat = cur_vao->mats;
             while (cur_mat != NULL){
                 glBindTexture(GL_TEXTURE0, cur_mat->texture);
                 unif_set(cur_mat->uniforms);
-
                 obj_r_t *cur_obj = cur_mat->objs;
                 while (cur_obj != NULL){
                     unif_set(cur_obj->uniforms);
@@ -102,7 +101,6 @@ void rend_draw(rend_t* head){
                         cur_vao->count,
                         GL_UNSIGNED_INT,
                         0);
-
                     cur_obj = cur_obj->next;
                 }
                 cur_mat = cur_mat->next;

@@ -1,0 +1,123 @@
+[
+    {
+        "shader":"res/shaders/simple.glsl",
+        "vaos":[{
+                "vao":"res/meshes/cube.json",
+                "materials":[{
+                        "material":"res/materials/gold.json",
+                        "objects":[{
+                                "pos":[-15,  0, -3],
+                                "rot":[ 0,  0,  0,  0],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[-13,  0, -3],
+                                "rot":[ 0,  0,  0,  0],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    },{
+                        "material":"res/materials/wood.json",
+                        "objects":[{
+                                "pos":[-11,  0, -3],
+                                "rot":[ 0,  0,  0,  0],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[-9,  0, -3],
+                                "rot":[ 0,  0,  0,  0],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    }
+                ]
+            },{
+                "vao":"res/meshes/plane.json",
+                "materials":[{
+                        "material":"res/materials/gold.json",
+                        "objects":[{
+                                "pos":[-7,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[-5,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    },{
+                        "material":"res/materials/wood.json",
+                        "objects":[{
+                                "pos":[-3,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[-1,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },{
+        "shader":"res/shaders/basic.glsl",
+        "vaos":[{
+                "vao":"res/meshes/cube.json",
+                "materials":[{
+                        "material":"res/materials/gold.json",
+                        "objects":[{
+                                "pos":[ 1,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[ 3,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    },{
+                        "material":"res/materials/wood.json",
+                        "objects":[{
+                                "pos":[ 5,  0, -3],
+                                "rot":[ 0,  0,  1,  3.14],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[ 7,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    }
+                ]
+            },{
+                "vao":"res/meshes/plane.json",
+                "materials":[{
+                        "material":"res/materials/gold.json",
+                        "objects":[{
+                                "pos":[ 9,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[11,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    },{
+                        "material":"res/materials/wood.json",
+                        "objects":[{
+                                "pos":[13,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            },{
+                                "pos":[15,  0, -3],
+                                "rot":[ 1,  0,  0,  1.57],
+                                "scl":[ 1,  1,  1]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

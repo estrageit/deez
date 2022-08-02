@@ -7,17 +7,24 @@
 
 #include <glad/gl.h>
 
+#include "cache.h"
+
+cache_l* cache_mesh = NULL;
+
 //todo: add checks in this function for improperly formatted json files!!
-unsigned int mesh_make(const char* path, unsigned int* index_count){
+mesh_t* mesh_make(const char* path){
+    mesh_t* cached = cache_get(cache_mesh, path);
+    if(cached){
+        return cached;
+    }
+
+    mesh_t* mesh = malloc(sizeof(mesh_t));
     FILE *fp;
 	fp = fopen(path, "r");
-
     fseek(fp, 0, SEEK_END);
     unsigned int f_size = ftell(fp); 
     fseek(fp, 0, SEEK_SET);
-
-    char* buf = malloc(f_size);
-
+    char* buf = malloc(f_size + 1);
 	fread(buf, f_size, 1, fp);
 	fclose(fp);
 
@@ -103,7 +110,10 @@ unsigned int mesh_make(const char* path, unsigned int* index_count){
     free(indices);
     free(vertices);
 
-    *index_count = indexc;
+    mesh->vao = vao;
+    mesh->tcount = indexc;
 
-    return vao;
+    cache_push(&cache_mesh, path, mesh);
+
+    return mesh;
 }
