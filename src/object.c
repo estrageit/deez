@@ -10,7 +10,7 @@
 
 cache_l* cache_mat = NULL;
 
-material_t* mat_make_from_file(const char* path){
+material_t* mat_make_from_file(void* idcache, const char* path){
     material_t* cached = cache_get(cache_mat, path);
     if(cached){
         return cached;
@@ -57,8 +57,12 @@ material_t* mat_make_from_file(const char* path){
     if (*tex_path != '\0')
         mat->texture = texture_load(tex_path);
 
-    //free(buf);
-    //json_object_put(j_mat);
+    json_object* j_mat_cache = json_object_object_get(j_mat, "id");
+    if (j_mat_cache != NULL)
+        cache_push((cache_l**)idcache, json_object_get_string(j_mat_cache), mat);
+
+    free(buf);
+    json_object_put(j_mat);
 
     cache_push(&cache_mat, path, mat);
 

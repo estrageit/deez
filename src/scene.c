@@ -7,6 +7,7 @@
 #include <cglm/cglm.h>
 #include <json-c/json.h>
 
+#include "cache.h"
 #include "renderer.h"
 //#include "collider.h"
 #include "shader.h"
@@ -29,9 +30,7 @@ obj_t* make_obj(json_object* j_obj){
     for (int i = 0; i < 3; i++){
         json_object* index = json_object_array_get_idx(j_current, i);
         obj->pos[i] = json_object_get_double(index);
-        //printf("%f ", obj->pos[i]);
     }
-    //printf("\n");
     j_current = json_object_object_get(j_obj, "rot");
     for (int i = 0; i < 3; i++){
         json_object* index = json_object_array_get_idx(j_current, i);
@@ -39,7 +38,6 @@ obj_t* make_obj(json_object* j_obj){
     }
     json_object* index = json_object_array_get_idx(j_current, 3);
     obj->angle = json_object_get_double(index);
-    //printf("%f\n", obj->angle);
     j_current = json_object_object_get(j_obj, "scl");
     for (int i = 0; i < 3; i++){
         json_object* index = json_object_array_get_idx(j_current, i);
@@ -53,6 +51,7 @@ scene_t* scene_load(const char* path){
     scene_t* scene = malloc(sizeof(scene_t)); 
     scene->time = 0;
     scene->rend = NULL;
+    scene->idcache = NULL;
     scene->proj = malloc(sizeof(mat4));
     scene->view = malloc(sizeof(mat4));
     glm_vec3_copy((vec3){0, 0, -1}, scene->camera_rot);
@@ -113,7 +112,7 @@ scene_t* scene_load(const char* path){
             for (int k = 0; k < material_count; k++){
                 json_object* j_material = json_object_array_get_idx(j_materials, k);
 
-                material_t* material = mat_make_from_file(json_object_get_string(json_object_object_get(j_material, "material")));
+                material_t* material = mat_make_from_file(&scene->idcache, json_object_get_string(json_object_object_get(j_material, "material")));
                 rend_material_push(*r_vao, material->texture);
 
                 unif_push(&(*r_material)->uniforms, unif_locs[3], UNIF_VEC3, material->ambient);
@@ -135,6 +134,10 @@ scene_t* scene_load(const char* path){
                     glm_translate(*obj_trans, obj->pos);
                     glm_rotate(*obj_trans, obj->angle, obj->rot);
                     unif_push(&(*r_object)->uniforms, unif_locs[2], UNIF_MAT4, obj_trans);
+
+                    json_object* j_obj_cache = json_object_object_get(j_object, "id");
+                    if (j_obj_cache != NULL)
+                        cache_push((cache_l**)(&scene->idcache), json_object_get_string(j_obj_cache), obj_trans);
 
                     r_object = &(*r_object)->next;
                 }
@@ -175,7 +178,8 @@ void scene_update(scene_t* scene, float time, int wwidth, int wheight, void* inp
     glm_vec3_add(scene->camera_rot, rot, rot);
     glm_vec3_normalize(rot);
     if (glm_vec3_angle((vec3){0, 1, 0}, rot) > 0.3f &&
-        glm_vec3_angle((vec3){0, -1, 0}, rot) > 0.3f){
+        glm_vec3_angle((vec3){0, -1, 0}, rot) > 0.3f &&
+        ((input_t*)input)->m.lock){
         glm_vec3_copy(rot, scene->camera_rot);
     }
 
@@ -188,6 +192,14 @@ void scene_update(scene_t* scene, float time, int wwidth, int wheight, void* inp
 
     glm_perspective(glm_rad(90.0f), ((float)wwidth)/wheight, 0.1f, 100.0f, *(mat4*)scene->proj);
     glm_vec3_copy((vec3){sin(time) * 10, 10, cos(time) * 10}, scene->light_pos);
+
+    mat4* light_trans = cache_get(scene->idcache, "light");
+    glm_mat4_identity(*light_trans);
+    glm_translate(*light_trans, scene->light_pos);
+
+    material_t* mat_gold = cache_get(scene->idcache, "gold");
+    mat_gold->ambient[2] = (sin(time) / 2.0f) + 1.0f;
+    mat_gold->diffuse[2] = (sin(time) / 2.0f) + 1.0f;
 
     rend_draw(scene->rend);
 }

@@ -3,6 +3,7 @@
 typedef struct scene_t {
     float time;
     void* rend;
+    void* idcache;
 
     void* proj;
     void* view;
