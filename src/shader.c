@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "cache.h"
+#include "link.h"
 
 unsigned int compile_shader(int type, const char* source){
     unsigned int shader = glCreateShader(type);
@@ -54,9 +55,18 @@ unsigned int shader_make(const char* vertex, const char* fragment){
     return id;
 }
 
+void shader_input_push(s_keyl_t** keys, unsigned int type, unsigned int key, void* data){
+    s_keyl_t* node = malloc(sizeof(s_keyl_t));
+    node->data = data;
+    node->key = key;
+    node->type = type;
+    node->next = NULL;
+    lnk_push((lnk**)keys, (lnk*)node);
+}
+
 cache_l* cache_s = NULL;
 
-unsigned int shader_make_from_file(const char* path){
+unsigned int shader_make_from_file(const char* path, s_keyl_t* keys){
     unsigned int cached = (uint64_t)cache_get(cache_s, path);
     if(cached){
         return cached;
@@ -127,14 +137,22 @@ unsigned int shader_make_from_file(const char* path){
                 printf("[ERROR] shader '%s' formatted incorrectly: SHADER_TYPE '%s' is incorrect\n", path, arg);
             arg[4] = tempchar;
         }
-        else if(strcmp(key, "INT") == 0){
-        
+        else if(strcmp(key, "INTEGER") == 0){
+            int index;
+            sscanf(key + keylen + 1, "%d", &index);
+            s_keyl_t* curk = keys;
+            while (curk != NULL){
+                if (index == curk->key){
+                    sprintf(key - 1, "%09d", *(int*)(curk->data));
+                    key[8] = ' ';
+                }
+                curk = curk->next;
+            }
         }
         else{
             printf("[ERROR] shader '%s' formatted incorrectly: incorrect key '%s'\n", path, key);
         }
     }
-
     //printf("SRC_VERT : %s\n", src_vert);
     //printf("SRC_FRAG : %s\n", src_frag);
 

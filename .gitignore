@@ -55,4 +55,6 @@ include/
 lib/
 bin
 .vscode/
-res/textures/wood.jpg
+res/textures/wood.png
+res/textures/gold.jpg
+res/textures/wood_s.png

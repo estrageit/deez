@@ -6,6 +6,7 @@
 #include <glad/gl.h>
 
 #include "link.h"
+#include "material.h"
 
 void unif_set(unif_t* head){
     unif_t *current = head;
@@ -64,13 +65,13 @@ void rend_vao_push(rend_t* renderer_shader, unsigned int vao, unsigned int count
     lnk_push((lnk**)&renderer_shader->vaos, (lnk*)node);
 }
 
-void rend_material_push(vao_r_t* renderer_vao, unsigned int texture){
+void rend_material_push(vao_r_t* vao_renderer, void* mat){
     mat_r_t* node = malloc(sizeof(mat_r_t));
     node->next = NULL;
-    node->texture = texture;
+    node->mat = mat;
     node->objs = NULL;
     node->uniforms = NULL;
-    lnk_push((lnk**)&renderer_vao->mats, (lnk*)node);
+    lnk_push((lnk**)&vao_renderer->mats, (lnk*)node);
 }
 
 void rend_object_push(mat_r_t* renderer_material){
@@ -91,7 +92,10 @@ void rend_draw(rend_t* head){
             unif_set(cur_vao->uniforms);
             mat_r_t *cur_mat = cur_vao->mats;
             while (cur_mat != NULL){
-                glBindTexture(GL_TEXTURE0, cur_mat->texture);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, ((material_t*)cur_mat->mat)->diffuse);
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, ((material_t*)cur_mat->mat)->specular);
                 unif_set(cur_mat->uniforms);
                 obj_r_t *cur_obj = cur_mat->objs;
                 while (cur_obj != NULL){

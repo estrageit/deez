@@ -9,7 +9,6 @@ typedef struct scene_t {
     void* view;
     float camera_pos[3];
     float camera_rot[3];
-    float light_pos[3];
 } scene_t;
 
 scene_t* scene_load(const char* path);

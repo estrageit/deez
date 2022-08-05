@@ -1,8 +1,5 @@
 {
-    "id": "gold",
-    "specular": [0.5, 0.5, 0.5],
-    "diffuse":  [1.0, 1.0, 0.0],
-    "ambient":  [1.0, 1.0, 0.0],
-    "shininess":0.5,
-    "texture":  ""
+    "specular": "res/textures/gold.jpg",
+    "diffuse":  "res/textures/gold.jpg",
+    "shininess":32
 }
