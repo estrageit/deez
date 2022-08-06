@@ -147,10 +147,13 @@ scene_t* scene_load(const char* path){
                     free(obj);
                     unif_push(&(*r_object)->uniforms, unif_locs[2], UNIF_MAT4, obj_trans);
 
-                    json_object* j_obj_cache = json_object_object_get(j_object, "id");
-                    if (j_obj_cache != NULL)
-                        cache_push((cache_l**)(&scene->idcache), json_object_get_string(j_obj_cache), obj_trans);
-
+                    json_object* j_obj_cache = json_object_object_get(j_object, "IDs");
+                    if (j_obj_cache != NULL){
+                        unsigned int idc = json_object_array_length(j_obj_cache);
+                        for (int m = 0; m < idc; m++){
+                            cache_push((cache_l**)(&scene->idcache), json_object_get_string(json_object_array_get_idx(j_obj_cache, m)), obj_trans);
+                        }
+                    }
                     r_object = &(*r_object)->next;
                 }
                 r_material = &(*r_material)->next;

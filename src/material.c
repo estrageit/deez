@@ -35,9 +35,13 @@ material_t* mat_make_from_file(void* idcache, const char* path){
     mat->specular = texture_load(json_object_get_string(json_object_object_get(j_mat, "specular")));
     mat->shininess = json_object_get_double(json_object_object_get(j_mat, "shininess"));
 
-    json_object* j_mat_cache = json_object_object_get(j_mat, "id");
-    if (j_mat_cache != NULL)
-        cache_push((cache_l**)idcache, json_object_get_string(j_mat_cache), mat);
+    json_object* j_mat_cache = json_object_object_get(j_mat, "IDs");
+    if (j_mat_cache != NULL){
+        unsigned int idc = json_object_array_length(j_mat_cache);
+        for (int i = 0; i < idc; i++){
+            cache_push((cache_l**)idcache, json_object_get_string(json_object_array_get_idx(j_mat_cache, i)), mat);
+        }
+    }
 
     json_object_put(j_mat);
 

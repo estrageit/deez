@@ -90,9 +90,13 @@ light_t* lighting_load(void* idcache, void* j_lighting, unsigned int* pointc, un
         } else {
             printf("[ERROR] Light type \"%s\" does not exist\n", ltype);
         }
-        json_object* j_light_cache = json_object_object_get(j_light, "id");
-        if (j_light_cache != NULL)
-            cache_push((cache_l**)idcache, json_object_get_string(j_light_cache), curl);
+        json_object* j_light_cache = json_object_object_get(j_light, "IDs");
+        if (j_light_cache != NULL){
+            unsigned int idc = json_object_array_length(j_light_cache);
+            for (int i = 0; i < idc; i++){
+                cache_push((cache_l**)idcache, json_object_get_string(json_object_array_get_idx(j_light_cache, i)), curl);
+            }
+        }
         lnk_push((lnk**)(&res), (lnk*)curl);
     }
     return res;
