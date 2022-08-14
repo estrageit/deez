@@ -16,6 +16,7 @@
 #include "material.h"
 #include "input.h"
 #include "light.h"
+#include "shadow.h"
 
 typedef struct obj_t {
     float pos[3];
@@ -208,7 +209,13 @@ void scene_update(scene_t* scene, float time, int wwidth, int wheight, void* inp
     glm_perspective(glm_rad(90.0f), ((float)wwidth)/wheight, 0.1f, 100.0f, *(mat4*)scene->proj);
 
     lspot_t* spotl = cache_get(scene->idcache, "spot");
-    glm_vec3_rotate(spotl->direction, sin(delta), (vec3){0,1,0});
+    glm_vec3_copy((vec3){0,0,-1}, spotl->direction);
+    glm_vec3_rotate(spotl->direction, time, (vec3){0,1,0});
+
+    mat4* spotlight = cache_get(scene->idcache, "spotlight");
+    glm_mat4_identity(*spotlight);
+    glm_translate(*spotlight, spotl->position);
+    glm_rotate(*spotlight, time, (vec3){0,1,0});
 
     rend_draw(scene->rend);
 }
